@@ -1,0 +1,74 @@
+plugins {
+    id 'java'
+}
+
+group 'restapi'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured
+    testCompile group: 'io.rest-assured', name: 'rest-assured', version: '4.3.1'
+
+    // https://mvnrepository.com/artifact/io.rest-assured/json-path
+    compile group: 'io.rest-assured', name: 'json-path', version: '4.3.1'
+
+    // https://mvnrepository.com/artifact/io.rest-assured/json-schema-validator
+    compile group: 'io.rest-assured', name: 'json-schema-validator', version: '4.3.1'
+    // https://mvnrepository.com/artifact/io.rest-assured/rest-assured-common
+    compile group: 'io.rest-assured', name: 'rest-assured-common', version: '4.3.1'
+    // https://mvnrepository.com/artifact/org.json/json
+    compile group: 'org.json', name: 'json', version: '20200518'
+
+
+    // cucumber ---> junit
+    testCompile 'info.cukes:cucumber-java:1.2.4'
+    compile group: 'info.cukes', name: 'cucumber-java', version: '1.2.4'
+    testCompile group: 'info.cukes', name: 'cucumber-junit', version: '1.2.4'
+
+    //reportes cucumber
+    compile group: 'net.masterthought', name: 'cucumber-reporting', version: '5.3.0'
+
+}
+
+task cucumber() {
+    dependsOn assemble, compileTestJava
+    doLast {
+        javaexec {
+            main = "cucumber.api.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            args = ['--plugin','json:build/reports/cucumber/report.json', '-f','pretty','--glue', 'runner', 'src/test/resources', '--tags']+[category]
+        }
+    }
+}
+
+configurations {
+    junitRuntime{
+        extendsFrom testRuntime
+    }
+}
+
+configurations {
+    cucumberRunTime{
+        extendsFrom testRuntime
+    }
+}
+
+
+
+task reportHTML(){
+    dependsOn classes, compileTestJava
+    doLast {
+        javaexec{
+            main =  "helpers.ReportHtml"
+            classpath= configuration.junitRunTime + sourceSets.main.output+  sourceSets.test.output
+            println "Reporte HTML creado"
+        }
+
+    }
+}
